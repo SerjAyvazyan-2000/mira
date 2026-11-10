@@ -82,10 +82,18 @@
     renderPrices(+b.dataset.i);
   });
   if (fine) {
+    // Заранее загружаем все фото прайса, чтобы при наведении они появлялись сразу
+    const loaded = new Set();
+    [...new Set(S.services.flatMap((g) => g.items.map((it) => it.img)).filter(Boolean))].forEach((src) => {
+      const im = new Image(); im.onload = () => loaded.add(src); im.src = src;
+    });
     let x = 0, y = 0, cx = 0, cy = 0;
     list.addEventListener("mouseover", (e) => {
       const li = e.target.closest(".price");
-      if (li && li.dataset.img) { cimg.style.backgroundImage = `url("${li.dataset.img}")`; cimg.classList.add("is-on"); }
+      if (!li) return;
+      const src = li.dataset.img;
+      if (src && loaded.has(src)) { cimg.style.backgroundImage = `url("${src}")`; cimg.classList.add("is-on"); }
+      else cimg.classList.remove("is-on");    // фото ещё не загрузилось или его нет — пустую рамку не показываем
     });
     list.addEventListener("mouseleave", () => cimg.classList.remove("is-on"));
     addEventListener("mousemove", (e) => { x = e.clientX; y = e.clientY; });
